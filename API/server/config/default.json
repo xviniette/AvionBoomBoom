@@ -1,9 +1,9 @@
 {
     "PORT":3001,
     "mariadb": {
-        "database": "abb",
+        "database": "avionboomboom",
         "username": "root",
-        "password": "adage",
+        "password": "",
         "host": ""
     },
     "redis": {

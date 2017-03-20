@@ -15,6 +15,7 @@ module.exports = function (app) {
     var UserPlane = sequelize.import("./models/UserPlane");
     var Team = sequelize.import("./models/Team");
     var TeamPlane = sequelize.import("./models/TeamPlane");
+    var Matchmaking = sequelize.import("./models/Matchmaking");
     var NetworkAuth = sequelize.import("./models/NetworkAuth");
     var TokenBlacklist = sequelize.import("./models/TokenBlacklist");
 
@@ -45,6 +46,9 @@ module.exports = function (app) {
     });
     PlaneMatch.belongsTo(UserMatch);
 
+    Matchmaking.belongsTo(User, {as:"from"});
+    Matchmaking.belongsTo(User, {as:"to"});
+
     NetworkAuth.belongsTo(User);
     TokenBlacklist.belongsTo(User);
 
@@ -60,6 +64,7 @@ module.exports = function (app) {
         UserPlane,
         Team,
         TeamPlane,
+        Matchmaking,
         NetworkAuth,
         TokenBlacklist
     };
