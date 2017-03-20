@@ -1,3 +1,7 @@
+API/node_modules/**
+GameServer/node_modules/**
+.vscode/launch.json
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

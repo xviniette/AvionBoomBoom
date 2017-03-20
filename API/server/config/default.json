@@ -1,0 +1,24 @@
+{
+    "PORT":3000,
+    "mariadb": {
+        "database": "avionboomboom",
+        "username": "root",
+        "password": "",
+        "host": "localhost"
+    },
+    "redis": {
+        "db": 1
+    },
+    "jwt": {
+        "accessKey": "sdf5sd6f5ae4zf5cs3ddf43s5d4f4ez",
+        "refreshKey": "kjskqjezakjkesqezae4535eza",
+        "type": "Bearer",
+        "access_expire": 9999999,
+        "refresh_expire": 2592000
+    },
+    "pbkdf2": {
+        "iteration": 20000,
+        "keylen": 256,
+        "digest": "sha256"
+    }
+}
