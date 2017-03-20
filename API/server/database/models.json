@@ -1,7 +1,10 @@
 {
     "user": {
         "public": ["id", "username", "elo", "win", "lose", "draw", "createdAt", "lastAction"],
-        "private": ["gold", "email"]
+        "private": ["golds", "gems", "email"]
+    },
+    "plane": {
+        "public": ["id", "name", "level", "life", "armor", "radius", "minspeed", "maxspeed", "rotation", "damage", "range", "shootAngle", "fireRate"]
     },
     "match": {
         "public": ["id", "score1", "score2", "mapId", "createdAt"]

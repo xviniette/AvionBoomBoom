@@ -48,9 +48,7 @@ module.exports = function (app) {
     NetworkAuth.belongsTo(User);
     TokenBlacklist.belongsTo(User);
 
-    sequelize.sync({
-        force: true
-    });
+    sequelize.sync();
 
     return {
         sequelize: sequelize,
