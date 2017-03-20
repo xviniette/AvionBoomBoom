@@ -162,13 +162,13 @@ module.exports = function (app, router) {
                         limit: req.pagination.limit,
                         order: req.sort,
                         include: [{
-                                model: db.User,
-                                attributes: models.user.public
-                            },
-                            {
-                                model: db.Map,
-                                attributes: ["id", "name", "type", "playable", "difficulty"]
-                            }
+                            model: db.User,
+                            attributes: models.user.public
+                        },
+                        {
+                            model: db.Map,
+                            attributes: ["id", "name", "type", "playable", "difficulty"]
+                        }
                         ]
                     }).then((matchs) => {
                         cb(false, matchs);
@@ -241,5 +241,42 @@ module.exports = function (app, router) {
                 error_description: err
             });
         });
+    });
+
+    router.get("/:id/planes", middlewares.all(models.plane.public, 0, 50, 100, "plane"), (req, res) => {
+        db.User.findOne({
+            where:{
+                id:req.params.id
+            }
+        }).then((user) => {
+            if (user == null) {
+                res.status(404).json({
+                    error: "not_found",
+                    error_description: `User with id '${req.params.id}' doesn't exist`
+                });
+                return;
+            }
+
+            user.getPlanes({
+                where: req.filter,
+                attributes: req.fields,
+                offset: req.pagination.offset,
+                limit: req.pagination.limit,
+                order: req.sort
+            }).then((planes) => {
+                res.status(200).json(planes);
+            }).catch(() => {
+                res.status(500).json({
+                    error: "server_error",
+                    error_description: err
+                });
+            });
+
+        }).catch(() => {
+            res.status(500).json({
+                error: "server_error",
+                error_description: err
+            });
+        })
     });
 }

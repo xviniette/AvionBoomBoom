@@ -1,10 +1,10 @@
 {
-    "PORT":3000,
+    "PORT":3001,
     "mariadb": {
-        "database": "avionboomboom",
+        "database": "abb",
         "username": "root",
-        "password": "",
-        "host": "localhost"
+        "password": "adage",
+        "host": ""
     },
     "redis": {
         "db": 1
@@ -20,5 +20,8 @@
         "iteration": 20000,
         "keylen": 256,
         "digest": "sha256"
+    },
+    "game":{
+        "teamlevel":20
     }
 }

@@ -60,21 +60,48 @@ module.exports = function (app, router) {
         }).catch((err) => {
             res.status(500).json({
                 error: "server_error",
-                error_description: err
+                error_description: "Internal server error"
             });
         });
     });
 
     router.post("/", middlewares.isAuth, (req, res) => {
-        
+        var planeData = {};
+        for (var i in req.body) {
+            if (models.plane.update.indexOf(i) != -1) {
+                planeData[i] = req.body[i];
+            }
+        }
+
+        db.Plane.create(planeData).then((plane) => {
+            res.status(201).json(plane);
+        }).catch(() => {
+            res.status(500).json({
+                error: "server_error",
+                error_description: "Internal server error"
+            });
+        });
     });
 
-    router.patch("/", middlewares.isAuth, (req, res) => {
+    router.patch("/:id", middlewares.isAuth, (req, res) => {
+        var planeData = {};
+        for (var i in req.body) {
+            if (models.plane.update.indexOf(i) != -1) {
+                planeData[i] = req.body[i];
+            }
+        }
 
+        db.Plane.update(planeData, {
+            where:{
+                id:req.params.id
+            }
+        }).then(() => {
+            res.status(200).sen();
+        }).catch(() => {
+            res.status(500).json({
+                error: "server_error",
+                error_description: "Internal server error"
+            });
+        });
     });
-
-    router.delete("/", middlewares.isAuth, (req, res) => {
-
-    });
-
 }

@@ -4,7 +4,11 @@
         "private": ["golds", "gems", "email"]
     },
     "plane": {
-        "public": ["id", "name", "level", "life", "armor", "radius", "minspeed", "maxspeed", "rotation", "damage", "range", "shootAngle", "fireRate"]
+        "public": ["id", "name", "level", "life", "armor", "radius", "minspeed", "maxspeed", "rotation", "damage", "range", "shootAngle", "fireRate", "createdAt", "updatedAt"],
+        "update": ["name", "level", "life", "armor", "radius", "minspeed", "maxspeed", "rotation", "damage", "range", "shootAngle", "fireRate"]
+    },
+    "team": {
+        "public": ["id", "name", "order", "userId", "createdAt", "updatedAt"]
     },
     "match": {
         "public": ["id", "score1", "score2", "mapId", "createdAt"]
