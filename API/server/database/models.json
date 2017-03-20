@@ -1,6 +1,6 @@
 {
     "user": {
-        "public": ["id", "username", "elo", "win", "lose", "draw", "createdAt", "lastAction"],
+        "public": ["id", "username", "elo", "win", "lose", "draw", "createdAt", "lastAction", "createdAt", "updatedAt"],
         "private": ["golds", "gems", "email"]
     },
     "plane": {
@@ -10,13 +10,7 @@
     "team": {
         "public": ["id", "name", "order", "userId", "createdAt", "updatedAt"]
     },
-    "match": {
-        "public": ["id", "score1", "score2", "mapId", "createdAt"]
-    },
-    "map": {
-        "public": ["id", "name", "informations", "type", "playable", "difficulty"]
-    },
-    "follower": {
-        "public": ["id", "accepted", "fromId", "toId", "createdAt"]
+    "match":{
+        "public": ["id", "ranked", "lastTurn", "width", "height", "turn", "status", "turnTime", "createdAt", "lastAction"]
     }
 }

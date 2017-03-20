@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    return sequelize.define("match", {
+    return sequelize.define("matchmaking", {
         ranked: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
