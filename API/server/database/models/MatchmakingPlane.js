@@ -1,6 +1,6 @@
 module.exports = function (sequelize, DataTypes) {
-    return sequelize.define("userplane", {
-    	
+    return sequelize.define("matchmakingplane", {
+     
     });
 
 }

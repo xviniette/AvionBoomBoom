@@ -16,8 +16,8 @@ module.exports = function (app, router) {
                     limit: req.pagination.limit,
                     order: req.sort,
                     include: [{
-                        model: db.Plane,
-                        attributes: models.plane.public
+                        model: db.UserPlane,
+                        include: [db.Plane]
                     }]
                 }).then((teams) => {
                     cb(false, teams);
@@ -54,8 +54,8 @@ module.exports = function (app, router) {
             },
             attributes: req.fields,
             include: [{
-                model: db.Plane,
-                attributes: models.plane.public
+                model: db.UserPlane,
+                include: [db.Plane]
             }]
         }).then((team) => {
             if(team == null){
@@ -76,6 +76,7 @@ module.exports = function (app, router) {
 
             res.status(200).json(team);
         }).catch((err) => {
+            console.log(err);
             res.status(500).json({
                 error: "server_error",
                 error_description: err
@@ -205,9 +206,14 @@ module.exports = function (app, router) {
     //planes
     router.post("/:id/:plane", middlewares.isAuth, (req, res) => {
         db.Team.findOne({
-            where:{
-                id:req.params.id
-            }
+            where: {
+                id: req.params.id
+            },
+            attributes: req.fields,
+            include: [{
+                model: db.UserPlane,
+                include: [db.Plane]
+            }]
         }).then((team) => {
             if(team == null){
                 res.status(404).json({
@@ -246,39 +252,32 @@ module.exports = function (app, router) {
 
                 var p = userPlane.planes[0];
 
-                team.getPlanes()
-                .then((planes) => {
-                    var levelSum = 0;
-                    for(var plane of planes){
-                        levelSum += plane.level;
-                        if(plane.id == req.params.plane){
-                            res.status(400).json({
-                                error: "already_in_team",
-                                error_description: `Plane with id '${req.params.plane}' is already in Team with id '${team.id}'`
-                            });
-                            return;
-                        }
-                    }
-
-                    if(levelSum + p.level > config.game.teamlevel){
+                var levelSum = 0;
+                for(var planeData of team.userplanes){
+                    var plane = planeData.plane;
+                    levelSum += plane.level;
+                    if(plane.id == p.id){
                         res.status(400).json({
-                            error: "team_level",
-                            error_description: `Team level would be ${levelSum + plane.level} instead of ${config.game.teamlevel} max'`
+                            error: "already_in_team",
+                            error_description: `Plane with id '${req.params.plane}' is already in Team with id '${team.id}'`
                         });
                         return;
                     }
+                }
 
-                    db.TeamPlane.create({
-                        planeId:p.id,
-                        teamId:team.id
-                    }).then(() => {
-                        res.status(201).json(plane);
-                    }).catch((err) => {
-                        res.status(500).json({
-                            error: "server_error",
-                            error_description: "Internal server error"
-                        });
+                if(levelSum + p.level > config.game.teamlevel){
+                    res.status(400).json({
+                        error: "team_level",
+                        error_description: `Team level would be ${levelSum + plane.level} instead of ${config.game.teamlevel} max'`
                     });
+                    return;
+                }
+
+                db.TeamPlane.create({
+                    userplanePlaneId:p.id,
+                    teamId:team.id
+                }).then(() => {
+                    res.status(201).json(plane);
                 }).catch((err) => {
                     console.log(err);
                     res.status(500).json({
@@ -297,6 +296,7 @@ module.exports = function (app, router) {
             });
 
         }).catch((err) => {
+            console.log(err);
             res.status(500).json({
                 error: "server_error",
                 error_description: "Internal server error"

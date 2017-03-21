@@ -65,57 +65,7 @@ module.exports = function (app, router) {
             });
         });
     });
-
-    router.get("/count", (req, res) => {
-        redis.get("users:count", (err, data) => {
-            if (!err && data !== null) {
-                res.status(200).json({
-                    count: data
-                });
-                return;
-            }
-            db.User.count().then((count) => {
-                redis.setex("users:count", 30, count);
-                res.status(200).json({
-                    count: count
-                });
-            }).catch((err) => {
-                res.status(500).json({
-                    error: "server_error",
-                    error_description: "Internal server error"
-                });
-            });
-        });
-    });
-
-    router.get("/online", (req, res) => {
-        redis.get("users:online", (err, data) => {
-            if (!err && data !== null) {
-                res.status(200).json({
-                    online: data
-                });
-                return;
-            }
-            db.User.count({
-                where: {
-                    lastAction: {
-                        $gt: new Date(new Date() - 5 * 60 * 1000)
-                    }
-                }
-            }).then((online) => {
-                redis.setex("users:online", 30, online);
-                res.status(200).json({
-                    online: online
-                });
-            }).catch((err) => {
-                res.status(500).json({
-                    error: "server_error",
-                    error_description: "Internal server error"
-                });
-            });
-        });
-    });
-
+    
     router.get("/:id", middlewares.fields(models.user.public), (req, res) => {
         db.User.findOne({
             where: {

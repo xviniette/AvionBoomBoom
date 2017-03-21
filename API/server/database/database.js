@@ -16,38 +16,61 @@ module.exports = function (app) {
     var Team = sequelize.import("./models/Team");
     var TeamPlane = sequelize.import("./models/TeamPlane");
     var Matchmaking = sequelize.import("./models/Matchmaking");
+    var MatchmakingPlane = sequelize.import("./models/MatchmakingPlane");
     var NetworkAuth = sequelize.import("./models/NetworkAuth");
     var TokenBlacklist = sequelize.import("./models/TokenBlacklist");
 
-    User.belongsToMany(Match, {
-        through: UserMatch
-    });
+    
+
+    //USER PLANE
     Plane.belongsToMany(User, {
         through: UserPlane
     });
     User.belongsToMany(Plane, {
         through: UserPlane
     });
+    UserPlane.belongsTo(User);
+    UserPlane.belongsTo(Plane);
+
+    //TEAM
     Team.belongsTo(User);
-    Plane.belongsToMany(Team, {
+    UserPlane.belongsToMany(Team, {
         through: TeamPlane
     });
-    Team.belongsToMany(Plane, {
+    Team.belongsToMany(UserPlane, {
         through: TeamPlane
+    });
+    TeamPlane.belongsTo(Team);
+    TeamPlane.belongsTo(UserPlane);
+
+    //USER MATCH
+    User.belongsToMany(Match, {
+        through: UserMatch
     });
     Match.belongsToMany(User, {
         through: UserMatch
     });
-    Match.belongsToMany(Plane, {
+    UserMatch.belongsTo(Match);
+    UserMatch.belongsTo(User);
+
+    Match.belongsToMany(UserPlane, {
         through: PlaneMatch
     });
-    Plane.belongsToMany(Match, {
+    UserPlane.belongsToMany(Match, {
         through: PlaneMatch
     });
     PlaneMatch.belongsTo(UserMatch);
+    PlaneMatch.belongsTo(Match);
+    PlaneMatch.belongsTo(UserPlane);
 
     Matchmaking.belongsTo(User, {as:"from"});
     Matchmaking.belongsTo(User, {as:"to"});
+    Matchmaking.belongsToMany(UserPlane, {
+        through: MatchmakingPlane
+    });
+    UserPlane.belongsToMany(Matchmaking, {
+        through: MatchmakingPlane
+    });
 
     NetworkAuth.belongsTo(User);
     TokenBlacklist.belongsTo(User);
