@@ -76,7 +76,6 @@ module.exports = function (app, router) {
 
             res.status(200).json(team);
         }).catch((err) => {
-            console.log(err);
             res.status(500).json({
                 error: "server_error",
                 error_description: err
@@ -204,7 +203,7 @@ module.exports = function (app, router) {
     });
 
     //planes
-    router.post("/:id/:plane", middlewares.isAuth, (req, res) => {
+    router.post("/:id/plane/:plane", middlewares.isAuth, (req, res) => {
         db.Team.findOne({
             where: {
                 id: req.params.id
@@ -277,9 +276,8 @@ module.exports = function (app, router) {
                     userplanePlaneId:p.id,
                     teamId:team.id
                 }).then(() => {
-                    res.status(201).json(plane);
+                    res.status(201).json(p);
                 }).catch((err) => {
-                    console.log(err);
                     res.status(500).json({
                         error: "server_error",
                         error_description: "Internal server error"
@@ -287,7 +285,6 @@ module.exports = function (app, router) {
                 });
 
             }).catch((err) => {
-                console.log(err);
                 res.status(500).json({
                     error: "server_error",
                     error_descriptiaon: "Internal server error"
@@ -296,7 +293,6 @@ module.exports = function (app, router) {
             });
 
         }).catch((err) => {
-            console.log(err);
             res.status(500).json({
                 error: "server_error",
                 error_description: "Internal server error"
@@ -305,7 +301,7 @@ module.exports = function (app, router) {
         });
     });
 
-    router.delete("/:id/:plane", middlewares.isAuth, (req, res) => {
+    router.delete("/:id/plane/:plane", middlewares.isAuth, (req, res) => {
         db.Team.findOne({
             where:{
                 id:req.params.id
@@ -330,7 +326,7 @@ module.exports = function (app, router) {
             db.TeamPlane.destroy({
                 where:{
                     teamId:req.params.id,
-                    planeId:req.params.plane
+                    userplanePlaneId:req.params.plane
                 }
             }).then((plane) => {
                 res.status(200).json({id:req.params.plane});
