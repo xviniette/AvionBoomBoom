@@ -166,7 +166,7 @@ module.exports = function (app, router) {
             if(team.userId != req.auth.id){
                 res.status(403).json({
                     error: "not_allowed",
-                    error_description: `You can't update this team`
+                    error_description: `You can't delete this team`
                 });
                 return;
             }

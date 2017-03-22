@@ -88,6 +88,7 @@ module.exports = function (app) {
         Team,
         TeamPlane,
         Matchmaking,
+        MatchmakingPlane,
         NetworkAuth,
         TokenBlacklist
     };
