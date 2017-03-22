@@ -9,6 +9,7 @@ module.exports = function (app) {
 
     var User = sequelize.import("./models/User");
     var Plane = sequelize.import("./models/Plane");
+    var Skin = sequelize.import("./models/Skin");
     var Match = sequelize.import("./models/Match");
     var UserMatch = sequelize.import("./models/UserMatch");
     var PlaneMatch = sequelize.import("./models/PlaneMatch");
@@ -29,6 +30,7 @@ module.exports = function (app) {
     });
     UserPlane.belongsTo(User);
     UserPlane.belongsTo(Plane);
+    UserPlane.belongsTo(Skin);
 
     //TEAM
     Team.belongsTo(User);

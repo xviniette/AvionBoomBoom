@@ -5,6 +5,12 @@ module.exports = function (app, router) {
     var middlewares = require("../../utilities/middlewares.js")(app);
     var models = require("../../database/models.json");
 
+    router.get("/level", (req, res) => {
+        res.status(200).json({
+            level:config.game.teamlevel
+        });
+    });
+
     router.get("/", middlewares.isAuth, middlewares.all(models.team.public, 0, 50, 100, "team"), (req, res) => {
         req.userId = req.auth.id;
         async.parallel({
