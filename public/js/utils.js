@@ -1,6 +1,6 @@
 Vue.http.interceptors.push((request, next) => {
     if (request.url.indexOf("https://") == -1 && request.url.indexOf("http://") == -1) {
-        request.url = "http://localhost:3000" + request.url;
+        request.url = "http://localhost:3001" + request.url;
     }
 
     var token = localStorage.getItem("token");

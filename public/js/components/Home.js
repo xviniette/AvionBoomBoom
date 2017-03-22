@@ -22,23 +22,17 @@ Vue.component('home', {
                     });
             }
         },
-        myProfile(){
-            if(this.me){
+        myProfile() {
+            if (this.me) {
                 this.$set(this.STORE, "profile", this.me.id);
             }
         },
-        ranking(){
-            this.$set(this.STORE, "ranking", true);
-        },
-        disconnect(){
+        disconnect() {
             localStorage.removeItem("token");
             this.$delete(this.STORE, "me");
         }
     },
     mounted() {
         this.getRank();
-        setInterval(() => {
-            this.getRank();
-        }, 60 * 1000);
     }
 });

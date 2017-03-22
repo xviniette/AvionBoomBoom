@@ -5,8 +5,38 @@ module.exports = function (app, router) {
     var middlewares = require("../../utilities/middlewares.js")(app);
     var models = require("../../database/models.json");
 
-    router.get("/", middlewares.isAuth, (req, res) => {
+    router.get("/from", middlewares.isAuth, (req, res) => {
+        db.Matchmaking.findAll({
+            where: {
+                fromId: req.auth.id
+            },
+            include: [{
+                model: db.UserPlane,
+                include: [db.Plane]
+            }]
+        }).then((mms) => {
+            res.status(200).json(mms);
+        }).catch((err) => {
+            res.status(500).json({
+                error: "server_error",
+                error_description: "Internal server error"
+            });
+        });
+    });
 
+    router.get("/to", middlewares.isAuth, (req, res) => {
+        db.Matchmaking.findAll({
+            where: {
+                toId: req.auth.id
+            }
+        }).then((mms) => {
+            res.status(200).json(mms);
+        }).catch((err) => {
+            res.status(500).json({
+                error: "server_error",
+                error_description: "Internal server error"
+            });
+        });
     });
 
     router.post("/", middlewares.getAuthUser, (req, res) => {
@@ -307,31 +337,31 @@ module.exports = function (app, router) {
 
     var createGame = function (id, cb) {
         db.Matchmaking.findOne({
-            where:{
-                id:id
+            where: {
+                id: id
             }
         }).then((mm) => {
 
             db.Match.create({
-                ranked:mm.ranked,
-                turnTime:mm.turnTime,
-                width:1000,
-                height:1000,
-                turn:0,
-                status:0
+                ranked: mm.ranked,
+                turnTime: mm.turnTime,
+                width: 1000,
+                height: 1000,
+                turn: 0,
+                status: 0
             }).then((match) => {
                 async.each([mm.fromId, mm.toId], (user, callback) => {
                     db.UserMatch.create({
-                        hasPlayed:0,
-                        userId:user,
-                        matchId:match.id
+                        hasPlayed: 0,
+                        userId: user,
+                        matchId: match.id
                     }).then((usermatch) => {
                         callback();
                     }).catch((err) => {
                         callback(err);
                     });
                 }, (err) => {
-                    if(err){
+                    if (err) {
                         cb(err);
                     }
                 });

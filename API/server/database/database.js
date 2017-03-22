@@ -20,8 +20,6 @@ module.exports = function (app) {
     var NetworkAuth = sequelize.import("./models/NetworkAuth");
     var TokenBlacklist = sequelize.import("./models/TokenBlacklist");
 
-    
-
     //USER PLANE
     Plane.belongsToMany(User, {
         through: UserPlane

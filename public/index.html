@@ -3,7 +3,7 @@
 
 <head>
     <meta charset='UTF-8' />
-    <title>BoomSoccer</title>
+    <title>AvionBoomBoom</title>
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 
@@ -11,13 +11,12 @@
     <div id="app">
         <sign class="inline" v-if="!STORE.me"></sign>
         <home class="inline" v-if="STORE.me"></home>
-        <ranking class="inline" v-if="STORE.ranking"></ranking>
-        <profile v-if="STORE.profile" :user="STORE.profile" class="inline"></profile>
-        <game class="inline"></game>
+        <planes class="inline" v-if="STORE.me"></planes>
+        <games class="inline" v-if="STORE.me"></games>
     </div>
     <script type="x-template" id="sign">
         <div>
-            <h1>BoomSoccer</h1>
+            <h1>AvionBoomBoom</h1>
             <h2>Connexion</h2>
             <form @submit.prevent="signin()">
                 <input type="text" placeholder="Pseudonyme" v-model="signin.username">
@@ -34,99 +33,47 @@
     </script>
     <script type="x-template" id="home">
         <div>
-            <button @click="disconnect">Disconnect</button>
-            <button @click="ranking">Ranking</button>
-            <div>
-                <h1 @click="myProfile">{{me.username}}</h1>
-                <h2>Elo : {{me.elo}}</h2>
-                <h2>Rank : {{rank}}</h2>
-            </div>
-            <matchmaking></matchmaking>
-            <private></private>
-            <training></training>
+            <h1>Home</h1>
+            <h1>{{STORE.me.username}}</h1>
+            <h2>Elo : {{STORE.me.elo}}</h2>
+            <h2>Rang : {{STORE.rank}}</h2>
         </div>
     </script>
-    <script type="x-template" id="game">
+    <script type="x-template" id="planes">
         <div>
-
-        </div>
-    </script>
-    <script type="x-template" id="profile">
-        <div>
-            <button @click="close">X</button>
-            <h1>{{profile.username}} {{connected}}</h1>
-            <h2>Elo : {{profile.elo}}</h2>
-            <h2>Ranking : {{ranking}}</h2>
-            <p>{{profile.win}} / {{profile.draw}} / {{profile.lose}}</p>
-            <h2>Match History</h2>
+            <h1>Planes</h1>
+            <h2>My planes</h2>
             <ul>
-                <li v-for="match in cleanMatchs">{{match.id}} {{match.type}} {{match.score1}} {{match.score2}} {{match.deltatime}}</li>
+                <li v-for="plane in STORE.userPlanes">{{plane.name}} ({{plane.level}})</li>
             </ul>
+            <h2>Not owned planes</h2>
+            <ul>
+                <li v-for="plane in getNotOwnedPlanes">{{plane.name}} ({{plane.level}})</li>
+            </ul>
+            <h2>Teams</h2>
+            <ul>
+                <li v-for="team in STORE.teams">
+                    <h3>{{team.name}} <button @click="deleteTeam(team.id)">-</button></h3>
+                    <form @submit.prevent="addTeamPlane(team.id, selectedPlane)">
+                        <select v-model="selectedPlane">
+                            <option v-for="plane in STORE.userPlanes" :value="plane.id">{{plane.name}}</option>
+                        </select>
+                        <input type="submit" value="+">
+                    </form>
+                    <ul>
+                        <li v-for="plane in team.userplanes">
+                            {{plane.plane.name}} ({{plane.plane.level}})<button @click="deleteTeamPlane(team.id, plane.plane.id)">-</button>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <form @submit.prevent="createTeam">
+                <input type="text" v-model="teamName">
+                <input type="submit" value="+">
+            </form>
         </div>
     </script>
-    <script type="x-template" id="ranking">
-        <div>
-            <button @click="close">X</button>
-            <table>
-                <tr>
-                    <th>#</th>
-                    <th>Player</th>
-                    <th>Elo</th>
-                    <th>Games</th>
-                </tr>
-                <tr v-for="(user, index) in users">
-                    <td v-if="users[index - 1] != undefined && users[index - 1].elo == user.elo">-</td>
-                    <td v-else>{{index + 1}}</td>
-                    <td><a href="#" @click.prevent="profile(user.id)">{{user.username}}</a></td>
-                    <td>{{user.elo}}</td>
-                    <td>{{user.win}} / {{user.draw}} / {{user.lose}}</td>
-                </tr>
-            </table>
-        </div>
-    </script>
-    <script type="x-template" id="matchmaking">
-        <div>
-            <div v-if="!STORE.inQueue">
-                <button @click="matchmaking" v-if="!STORE.inQueue">MatchMaking</button>
-            </div>
-            <div v-else>
-                <button @click="unmatchmaking" v-if="STORE.inQueue">X</button>
-                <h2>Searching... {{deltaTime}}</h2>
-                <p>{{nbInQueue}} players in queue</p>
-            </div>
-        </div>
-    </script>
-    <script type="x-template" id="private">
-        <div>
-            <div v-if="!display"><button @click="display = true">Custom Game</button></div>
-            <div v-if="display">
-                <button @click="display = false">X</button>
-                <form @submit.prevent="create">
-                    <select v-model="map">
-                        <option v-for="map in maps" :value="map.id" v-if="map.type == 'ranked'">{{map.name}}</option>
-                    </select>
-                    <select v-model="time">
-                        <option v-for="(timeDisplay, timeValue) in timers" :value="timeValue">{{timeDisplay}}</option>
-                    </select>
-                    <input type="submit" value="GO">
-                </form>
-            </div>
-        </div>
-    </script>
-    <script type="x-template" id="training">
-        <div>
-            <div v-if="!display"><button @click="display = true">Training</button></div>
-            <div v-if="display">
-                <button @click="display = false">X</button>
-                <form @submit.prevent="create">
-                    <select v-model="map">
-                        <option v-for="map in maps" :value="map.id" v-if="map.type == 'ranked'">{{map.name}}</option>
-                    </select>
-                    <input type="submit" value="GO">
-                </form>
-            </div>
-        </div>
-    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.7/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
@@ -136,13 +83,8 @@
     <script src="./js/main.js"></script>
     <script src="./js/components/Home.js"></script>
     <script src="./js/components/Sign.js"></script>
-    <script src="./js/components/Profile.js"></script>
-    <script src="./js/components/Ranking.js"></script>
-    <script src="./js/components/Game.js"></script>
-    <script src="./js/components/Message.js"></script>
-    <script src="./js/components/Matchmaking.js"></script>
-    <script src="./js/components/Private.js"></script>
-    <script src="./js/components/Training.js"></script>
+    <script src="./js/components/Games.js"></script>
+    <script src="./js/components/Planes.js"></script>
 </body>
 </body>
 

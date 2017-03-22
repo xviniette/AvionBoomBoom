@@ -3,7 +3,7 @@
     "mariadb": {
         "database": "avionboomboom",
         "username": "root",
-        "password": "",
+        "password": "adage",
         "host": ""
     },
     "redis": {
