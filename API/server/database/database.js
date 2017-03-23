@@ -63,8 +63,10 @@ module.exports = function (app) {
     PlaneMatch.belongsTo(Match);
     PlaneMatch.belongsTo(UserPlane);
 
+    //Matchmaking
     Matchmaking.belongsTo(User, {as:"from"});
     Matchmaking.belongsTo(User, {as:"to"});
+
     Matchmaking.belongsToMany(UserPlane, {
         through: MatchmakingPlane
     });
