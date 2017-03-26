@@ -11,13 +11,15 @@ module.exports = function (app, router) {
                 fromId: req.auth.id
             },
             include: [{
-                model: db.UserPlane,
-                include: [db.Plane]
-            },
-            {
-                model:db.User,
-                as:"to"
-            }]
+                    model: db.UserPlane,
+                    include: [db.Plane]
+                },
+                {
+                    model: db.User,
+                    as: "to",
+                    attributes: models.user.public,
+                }
+            ]
         }).then((mms) => {
             res.status(200).json(mms);
         }).catch((err) => {
@@ -32,7 +34,12 @@ module.exports = function (app, router) {
         db.Matchmaking.findAll({
             where: {
                 toId: req.auth.id
-            }
+            },
+            include: [{
+                model: db.User,
+                as: "from",
+                attributes: models.user.public,
+            }]
         }).then((mms) => {
             res.status(200).json(mms);
         }).catch((err) => {
@@ -48,10 +55,15 @@ module.exports = function (app, router) {
             req.body.turnTime = 24 * 60 * 1000;
         }
 
-        if (req.body.planes) {
-            req.body.planes = req.body.planes.split("|");
+        if (!req.body.planes) {
+            res.status(400).json({
+                error: "no_planes",
+                error_description: "You have to choose planes"
+            });
+            return;
         }
 
+        req.body.planes = req.body.planes.split("|");
         var planes = [];
         for (var i in req.body.planes) {
             var plane = req.body.planes[i];
@@ -60,7 +72,7 @@ module.exports = function (app, router) {
 
         db.UserPlane.findAll({
             where: {
-                planeId: planes,
+                id: planes,
                 userId: req.auth.id
             },
             include: [{
@@ -259,7 +271,9 @@ module.exports = function (app, router) {
                             }, function (err) {
                                 //CREATE GAME
                                 createGame(matchmaking.id, () => {
-
+                                    res.status(200).json({
+                                        lol: "lol"
+                                    });
                                 });
                             });
                         }
@@ -285,7 +299,6 @@ module.exports = function (app, router) {
             });
         });
     });
-
 
     router.delete("/:id", middlewares.isAuth, (req, res) => {
         db.Matchmaking.findOne({
@@ -340,6 +353,9 @@ module.exports = function (app, router) {
     });
 
     var createGame = function (id, cb) {
+        cb();
+
+        return;
         db.Matchmaking.findOne({
             where: {
                 id: id

@@ -7,12 +7,12 @@ module.exports = function (app, router) {
 
     router.get("/level", (req, res) => {
         res.status(200).json({
-            level:config.game.teamlevel
+            level: config.game.teamlevel
         });
     });
 
     router.get("/", middlewares.isAuth, middlewares.all(models.team.public, 0, 50, 100, "team"), (req, res) => {
-        req.userId = req.auth.id;
+        req.filter.userId = req.auth.id;
         async.parallel({
             teams(cb) {
                 db.Team.findAll({
@@ -64,7 +64,7 @@ module.exports = function (app, router) {
                 include: [db.Plane]
             }]
         }).then((team) => {
-            if(team == null){
+            if (team == null) {
                 res.status(404).json({
                     error: "not_found",
                     error_description: `Team with id '${req.params.id}' doesn't exist`
@@ -72,7 +72,7 @@ module.exports = function (app, router) {
                 return;
             }
 
-            if(team.userId != req.auth.id){
+            if (team.userId != req.auth.id) {
                 res.status(403).json({
                     error: "not_allowed",
                     error_description: `You can't access this team`
@@ -91,9 +91,9 @@ module.exports = function (app, router) {
 
     router.post("/", middlewares.isAuth, middlewares.isAuth, (req, res) => {
         db.Team.create({
-            name:req.body.name || "New Team",
-            order:0,
-            userId:req.auth.id
+            name: req.body.name || "New Team",
+            order: 0,
+            userId: req.auth.id
         }).then((team) => {
             res.status(201).json(team);
         }).catch(() => {
@@ -106,11 +106,11 @@ module.exports = function (app, router) {
 
     router.patch("/:id", middlewares.isAuth, middlewares.isAuth, (req, res) => {
         db.Team.findOne({
-            where:{
-                id:req.params.id
+            where: {
+                id: req.params.id
             }
         }).then((team) => {
-            if(team == null){
+            if (team == null) {
                 res.status(404).json({
                     error: "not_found",
                     error_description: `Team with id '${req.params.id}' doesn't exist`
@@ -118,7 +118,7 @@ module.exports = function (app, router) {
                 return;
             }
 
-            if(team.userId != req.auth.id){
+            if (team.userId != req.auth.id) {
                 res.status(403).json({
                     error: "not_allowed",
                     error_description: `You can't update this team`
@@ -133,10 +133,9 @@ module.exports = function (app, router) {
                 }
             }
 
-            db.Team.update(patchData, 
-            {
-                where:{
-                    id:req.params.id
+            db.Team.update(patchData, {
+                where: {
+                    id: req.params.id
                 }
             }).then((team) => {
                 res.status(200).send();
@@ -157,11 +156,11 @@ module.exports = function (app, router) {
 
     router.delete("/:id", middlewares.isAuth, (req, res) => {
         db.Team.findOne({
-            where:{
-                id:req.params.id
+            where: {
+                id: req.params.id
             }
         }).then((team) => {
-            if(team == null){
+            if (team == null) {
                 res.status(404).json({
                     error: "not_found",
                     error_description: `Team with id '${req.params.id}' doesn't exist`
@@ -169,7 +168,7 @@ module.exports = function (app, router) {
                 return;
             }
 
-            if(team.userId != req.auth.id){
+            if (team.userId != req.auth.id) {
                 res.status(403).json({
                     error: "not_allowed",
                     error_description: `You can't delete this team`
@@ -179,19 +178,19 @@ module.exports = function (app, router) {
 
 
             db.TeamPlane.destroy({
-                where:{
-                    teamId:req.params.id
+                where: {
+                    teamId: req.params.id
                 }
             }).then(() => {
                 team.destroy()
-                .then(() => {
-                    res.status(200).json(team);
-                }).catch(() => {
-                    res.status(500).json({
-                        error: "server_error",
-                        error_description: "Internal server error"
+                    .then(() => {
+                        res.status(200).json(team);
+                    }).catch(() => {
+                        res.status(500).json({
+                            error: "server_error",
+                            error_description: "Internal server error"
+                        });
                     });
-                });
             }).catch(() => {
                 res.status(500).json({
                     error: "server_error",
@@ -209,7 +208,7 @@ module.exports = function (app, router) {
     });
 
     //planes
-    router.post("/:id/plane/:plane", middlewares.isAuth, (req, res) => {
+    router.post("/:id/plane/:userplane", middlewares.isAuth, (req, res) => {
         db.Team.findOne({
             where: {
                 id: req.params.id
@@ -220,7 +219,7 @@ module.exports = function (app, router) {
                 include: [db.Plane]
             }]
         }).then((team) => {
-            if(team == null){
+            if (team == null) {
                 res.status(404).json({
                     error: "not_found",
                     error_description: `Team with id '${req.params.id}' doesn't exist`
@@ -228,7 +227,7 @@ module.exports = function (app, router) {
                 return;
             }
 
-            if(team.userId != req.auth.id){
+            if (team.userId != req.auth.id) {
                 res.status(403).json({
                     error: "not_allowed",
                     error_description: `You can't update this team`
@@ -236,32 +235,30 @@ module.exports = function (app, router) {
                 return;
             }
 
-            db.User.findOne({
-                where:{
-                    id:req.auth.id,
+            db.UserPlane.findOne({
+                where: {
+                    id: req.params.userplane,
+                    userId: req.auth.id
                 },
                 include: [{
-                    model: db.Plane,
-                    where:{
-                        id:req.params.plane
-                    }
+                    model:db.Plane
                 }]
             }).then((userPlane) => {
-                if(userPlane == null){
+                if (userPlane == null) {
                     res.status(404).json({
                         error: "not_found",
-                        error_description: `User with id '${req.auth.id}' doesn't have plane width id '${req.params.plane}'`
+                        error_description: `User with id '${req.auth.id}' doesn't have userplane width id '${req.params.userplane}'`
                     });
                     return;
                 }
 
-                var p = userPlane.planes[0];
+                var p = userPlane.plane;
 
                 var levelSum = 0;
-                for(var planeData of team.userplanes){
+                for (var planeData of team.userplanes) {
                     var plane = planeData.plane;
                     levelSum += plane.level;
-                    if(plane.id == p.id){
+                    if (plane.id == p.id) {
                         res.status(400).json({
                             error: "already_in_team",
                             error_description: `Plane with id '${req.params.plane}' is already in Team with id '${team.id}'`
@@ -270,7 +267,7 @@ module.exports = function (app, router) {
                     }
                 }
 
-                if(levelSum + p.level > config.game.teamlevel){
+                if (levelSum + p.level > config.game.teamlevel) {
                     res.status(400).json({
                         error: "team_level",
                         error_description: `Team level would be ${levelSum + plane.level} instead of ${config.game.teamlevel} max'`
@@ -279,8 +276,8 @@ module.exports = function (app, router) {
                 }
 
                 db.TeamPlane.create({
-                    userplanePlaneId:p.id,
-                    teamId:team.id
+                    userplaneId: userPlane.id,
+                    teamId: team.id
                 }).then(() => {
                     res.status(201).json(p);
                 }).catch((err) => {
@@ -291,6 +288,7 @@ module.exports = function (app, router) {
                 });
 
             }).catch((err) => {
+                console.log(err);
                 res.status(500).json({
                     error: "server_error",
                     error_descriptiaon: "Internal server error"
@@ -307,13 +305,13 @@ module.exports = function (app, router) {
         });
     });
 
-    router.delete("/:id/plane/:plane", middlewares.isAuth, (req, res) => {
+    router.delete("/:id/plane/:userplane", middlewares.isAuth, (req, res) => {
         db.Team.findOne({
-            where:{
-                id:req.params.id
+            where: {
+                id: req.params.id
             }
         }).then((team) => {
-            if(team == null){
+            if (team == null) {
                 res.status(404).json({
                     error: "not_found",
                     error_description: `Team with id '${req.params.id}' doesn't exist`
@@ -321,7 +319,7 @@ module.exports = function (app, router) {
                 return;
             }
 
-            if(team.userId != req.auth.id){
+            if (team.userId != req.auth.id) {
                 res.status(403).json({
                     error: "not_allowed",
                     error_description: `You can't update this team`
@@ -330,12 +328,14 @@ module.exports = function (app, router) {
             }
 
             db.TeamPlane.destroy({
-                where:{
-                    teamId:req.params.id,
-                    userplanePlaneId:req.params.plane
+                where: {
+                    teamId: req.params.id,
+                    userplaneId: req.params.userplane
                 }
             }).then((plane) => {
-                res.status(200).json({id:req.params.plane});
+                res.status(200).json({
+                    userplane: req.params.userplane
+                });
             }).catch(() => {
                 res.status(500).json({
                     error: "server_error",

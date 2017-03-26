@@ -56,13 +56,13 @@
                     <h3>{{team.name}} <button @click="deleteTeam(team.id)">-</button></h3>
                     <form @submit.prevent="addTeamPlane(team.id, selectedPlane)">
                         <select v-model="selectedPlane">
-                            <option v-for="plane in STORE.userPlanes" :value="plane.id">{{plane.name}}</option>
+                            <option v-for="plane in STORE.userPlanes" :value="plane.userplane.id">{{plane.name}}</option>
                         </select>
                         <input type="submit" value="+">
                     </form>
                     <ul>
-                        <li v-for="plane in team.userplanes">
-                            {{plane.plane.name}} ({{plane.plane.level}})<button @click="deleteTeamPlane(team.id, plane.plane.id)">-</button>
+                        <li v-for="userplane in team.userplanes">
+                            {{userplane.plane.name}} ({{userplane.plane.level}})<button @click="deleteTeamPlane(team.id, userplane.id)">-</button>
                         </li>
                     </ul>
                 </li>
@@ -73,6 +73,47 @@
             </form>
         </div>
     </script>
+    <script type="x-template" id="games">
+        <div>
+            <form @submit.prevent="matchmaking()">
+                Ranked <input type="radio" v-model="ranked" :value="true">
+                Friend <input type="radio" v-model="ranked" :value="false"> 
+                <span v-if="!ranked">
+                    <input list="users" v-model="user">
+                    <datalist id="users">
+                        <option v-for="autoUser in autocompleteUsers" :value="autoUser.username">
+                    </datalist>
+                </span>
+                Team : 
+                <select v-model="team">
+                    <option v-for="team in STORE.teams" :value="team.id">{{team.name}}</option>
+                </select>
+                <input type="submit" value="Créer">
+            </form>
+
+            <h1>Matchmaking</h1>
+            <h2>From me</h2>
+            <ul>
+                <li v-for="from in STORE.fromMatchmakings">
+                    <span v-if="from.ranked">Ranked</span>
+                    <span v-if="!from.ranked">Unranked</span>
+                    <span v-if="from.to">to : {{from.to.username}}</span>
+                    <button @click="deleteMatchmaking(from.id)">Delete</button>
+                </li>
+            </ul>
+            <h2>To me</h2>
+            <ul>
+                <li v-for="from in STORE.toMatchmakings">
+                    <span v-if="from.ranked">Ranked</span>
+                    <span v-if="!from.ranked">Unranked</span>
+                    <span v-if="from.to">to : {{from.to.username}}</span>
+                    <button @click="matchmaking(from.id)">Accept</button>
+                    <button @click="deleteMatchmaking(from.id)">Delete</button>
+                </li>
+            </ul>
+        </div>
+    </script>
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.7/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/vue.resource/1.0.3/vue-resource.min.js"></script>

@@ -73,6 +73,8 @@ module.exports = function (app) {
     UserPlane.belongsToMany(Matchmaking, {
         through: MatchmakingPlane
     });
+    MatchmakingPlane.belongsTo(UserPlane);
+    MatchmakingPlane.belongsTo(Matchmaking);
 
     NetworkAuth.belongsTo(User);
     TokenBlacklist.belongsTo(User);
