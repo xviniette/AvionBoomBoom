@@ -100,6 +100,7 @@ module.exports = function (app, router) {
                 return;
             }
 
+
             if (req.body.ranked == true) {
                 //RANKED
                 var deltaElo = 200;
@@ -126,7 +127,7 @@ module.exports = function (app, router) {
                         }).then((mm) => {
                             async.each(planes, function (plane, callback) {
                                 db.MatchmakingPlane.create({
-                                    userplanePlaneId: plane.planeId,
+                                    userplaneId: plane.id,
                                     matchmakingId: mm.id
                                 }).then(() => {
                                     callback();
@@ -155,7 +156,7 @@ module.exports = function (app, router) {
                         }).then((mm) => {
                             async.each(planes, function (plane, callback) {
                                 db.MatchmakingPlane.create({
-                                    userplanePlaneId: plane.planeId,
+                                    userplaneId: plane.id,
                                     matchmakingId: mm.id
                                 }).then(() => {
                                     callback();
@@ -167,10 +168,16 @@ module.exports = function (app, router) {
                                     res.status(500).json(mm);
                                     return;
                                 }
-                                res.status(200).json(mm);
-                            });
 
-                            //CREATE GAME
+                                createGame(mm.id, (err, match) => {
+                                    if(err){
+                                        res.status(500).json(err);
+                                        return;
+                                    }
+                                    res.status(200).json(match);
+                                });
+
+                            });
 
                         }).catch((err) => {
                             res.status(500).json({
@@ -237,7 +244,7 @@ module.exports = function (app, router) {
                             }).then((mm) => {
                                 async.each(planes, function (plane, callback) {
                                     db.MatchmakingPlane.create({
-                                        userplanePlaneId: plane.planeId,
+                                        userplaneId: plane.id,
                                         matchmakingId: mm.id
                                     }).then(() => {
                                         callback();
@@ -261,7 +268,7 @@ module.exports = function (app, router) {
                         } else {
                             async.each(planes, function (plane, callback) {
                                 db.MatchmakingPlane.create({
-                                    userplanePlaneId: plane.planeId,
+                                    userplaneId: plane.id,
                                     matchmakingId: matchmaking.id
                                 }).then(() => {
                                     callback();
@@ -269,11 +276,12 @@ module.exports = function (app, router) {
                                     callback(false);
                                 });
                             }, function (err) {
-                                //CREATE GAME
-                                createGame(matchmaking.id, () => {
-                                    res.status(200).json({
-                                        lol: "lol"
-                                    });
+                                createGame(matchmaking.id, (err, match) => {
+                                    if(err){
+                                        res.status(500).json(err);
+                                        return;
+                                    }
+                                    res.status(200).json(match);
                                 });
                             });
                         }
@@ -314,7 +322,7 @@ module.exports = function (app, router) {
                 return;
             }
 
-            if (mm.fromId != req.auth.id) {
+            if (mm.fromId != req.auth.id && mm.toId != req.auth.id) {
                 res.status(403).json({
                     error: "not_allowed",
                     error_description: `You can't delete this matchmaking`
@@ -353,13 +361,15 @@ module.exports = function (app, router) {
     });
 
     var createGame = function (id, cb) {
-        cb();
-
-        return;
         db.Matchmaking.findOne({
             where: {
                 id: id
-            }
+            },
+             include: [{
+                    model: db.UserPlane,
+                    include: [db.Plane]
+                }
+            ]
         }).then((mm) => {
 
             db.Match.create({
@@ -383,8 +393,44 @@ module.exports = function (app, router) {
                 }, (err) => {
                     if (err) {
                         cb(err);
+                        return;
                     }
+                    async.each(mm.userplanes, (userplane, callback) => {
+                        db.PlaneMatch.create({
+                            matchId:match.id,
+                            userplaneId:userplane.id,
+                            usermatchUserId:userplane.userId,
+                            life:userplane.plane.life
+                        }).then(() => {
+                            callback();
+                        }).catch((err) => {
+                            callback(true);
+                        });
+                    }, (err) => {
+                        if(err){
+                            cb(err);
+                            return;
+                        }
+                        db.MatchmakingPlane.destroy({
+                            where:{
+                                matchmakingId:mm.id
+                            }
+                        }).then(() => {
+                            db.Matchmaking.destroy({
+                                where:{
+                                    id:mm.id
+                                }
+                            }).then(() => {
+                                cb(false, match);
+                            }).catch(() => {
+
+                            })
+                        }).catch((err) => {
+
+                        })
+                    });
                 });
+
             }).catch((err) => {
                 cb(err);
             })

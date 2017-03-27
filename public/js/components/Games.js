@@ -31,10 +31,11 @@ Vue.component('games', {
             });
         },
         matchmaking(ranked, team, userId){
+            console.log(ranked, team, userId);
             var planes = [];
-            for(var team of this.STORE.teams){
-                if(team.id == team){
-                    for(var plane of team.userplanes){
+            for(var t of this.STORE.teams){
+                if(t.id == team){
+                    for(var plane of t.userplanes){
                         planes.push(plane.id);
                     }
                     break;

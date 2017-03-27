@@ -8,7 +8,7 @@ module.exports = function (sequelize, DataTypes) {
         playDate: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: sequelize.fn('NOW')
+            defaultValue: DataTypes.NOW
         },
     },
         {

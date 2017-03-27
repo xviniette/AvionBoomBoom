@@ -75,9 +75,9 @@
     </script>
     <script type="x-template" id="games">
         <div>
-            <form @submit.prevent="matchmaking()">
-                Ranked <input type="radio" v-model="ranked" :value="true">
-                Friend <input type="radio" v-model="ranked" :value="false"> 
+            <form @submit.prevent="matchmaking(ranked, team, userId)">
+                <input type="radio" v-model="ranked" :value="true"> Ranked
+                <input type="radio" v-model="ranked" :value="false"> Friend
                 <span v-if="!ranked">
                     <input list="users" v-model="user">
                     <datalist id="users">
@@ -98,7 +98,7 @@
                     <span v-if="from.ranked">Ranked</span>
                     <span v-if="!from.ranked">Unranked</span>
                     <span v-if="from.to">to : {{from.to.username}}</span>
-                    <button @click="deleteMatchmaking(from.id)">Delete</button>
+                    <button @click="deleteMatchmaking(from.id)">X</button>
                 </li>
             </ul>
             <h2>To me</h2>
@@ -107,8 +107,8 @@
                     <span v-if="from.ranked">Ranked</span>
                     <span v-if="!from.ranked">Unranked</span>
                     <span v-if="from.to">to : {{from.to.username}}</span>
-                    <button @click="matchmaking(from.id)">Accept</button>
-                    <button @click="deleteMatchmaking(from.id)">Delete</button>
+                    <button @click="matchmaking(from.ranked, team, from.from.id)">V</button>
+                    <button @click="deleteMatchmaking(from.id)">X</button>
                 </li>
             </ul>
         </div>
