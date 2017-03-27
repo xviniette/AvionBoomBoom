@@ -7,7 +7,7 @@ module.exports = function (app, router) {
     var redis = app.get("redis");
     var models = require("../../database/models.json");
 
-    router.get("/", middlewares.all(models.match.public, 0, 10, 100), (req, res) => {
+    router.get("/", middlewares.all(models.match.public, 0, 10, 100, "match"), (req, res) => {
         async.parallel({
             matchs(cb) {
                 db.Match.findAll({
@@ -21,11 +21,29 @@ module.exports = function (app, router) {
                             attributes: models.user.public
                         },
                         {
-                            model: db.Map,
-                            attributes: ["id", "name", "type", "playable", "difficulty"]
+                            model: db.UserPlane,
+                            include: {
+                                model: db.Plane
+                            }
                         }
                     ]
                 }).then((matchs) => {
+                    matchs = JSON.parse(JSON.stringify(matchs));
+
+                    for (var match of matchs) {
+                        for (var plane of match.userplanes) {
+                            if (!req.auth || req.auth.id != plane.userId) {
+                                if (match.status == 0) {
+                                    delete plane.planematch.x;
+                                    delete plane.planematch.y;
+                                    delete plane.planematch.direction;
+                                }
+                                delete plane.planematch.speed;
+                                delete plane.planematch.rotation;
+                            }
+                        }
+                    }
+
                     cb(false, matchs);
                 }).catch((err) => {
                     cb(err);
@@ -51,8 +69,6 @@ module.exports = function (app, router) {
             res.set("Content-Range", `${req.pagination.range}|${results.count}`);
             res.status((results.count == results.matchs.length) ? 200 : 206).json(results.matchs);
         });
-
-
     });
 
     router.get("/:id", middlewares.fields(models.match.public), (req, res) => {
@@ -66,8 +82,10 @@ module.exports = function (app, router) {
                     attributes: models.user.public
                 },
                 {
-                    model: db.Map,
-                    attributes: ["id", "name", "type", "playable", "difficulty"]
+                    model: db.UserPlane,
+                    include: {
+                        model: db.Plane
+                    }
                 }
             ]
         }).then((match) => {
@@ -79,75 +97,26 @@ module.exports = function (app, router) {
                 return;
             }
 
+            match = JSON.parse(JSON.stringify(match));
+
+            for (var plane of match.userplanes) {
+                if (!req.auth || req.auth.id != plane.userId) {
+                    if (match.status == 0) {
+                        delete plane.planematch.x;
+                        delete plane.planematch.y;
+                        delete plane.planematch.direction;
+                    }
+                    delete plane.planematch.speed;
+                    delete plane.planematch.rotation;
+                }
+            }
+
             res.status(200).json(match);
         }).catch((err) => {
+            console.log(err);
             res.status(500).json({
                 error: "server_error",
                 error_description: "Internal server error"
-            });
-        });
-    });
-
-    router.post("/", (req, res) => {
-        if (!req.body.data) {
-            res.status(400).json({
-                error: "bad_request",
-                error_description: "Missing server informations"
-            });
-            return;
-        }
-
-        jwt.verify(req.body.data, config.jwtServer, (err, decoded) => {
-            if (err) {
-                res.status(401).json({
-                    error: "no_access",
-                    error_description: "Wrong password"
-                });
-                return;
-            }
-
-            redis.hget("game", decoded.id, (err, game) => {
-                if (err) {
-                    res.status(500).json({
-                        error: "server_error",
-                        error_description: "Internal server error"
-                    });
-                    return;
-                }
-
-                if (game == null) {
-                    res.status(404).json({
-                        error: "game_not_found",
-                        error_description: "Game doesn't exist"
-                    });
-                    return;
-                }
-
-                db.Match.create({
-                    mapId: decoded.map,
-                    score1: decoded.score1,
-                    score2: decoded.score2
-                }).then((match) => {
-                    async.each(decoded.players, (player, callback) => {
-                        db.UserMatch.create({
-                            matchId: match.id,
-                            userId: player.id,
-                            team: player.team
-                        }).then(() => {
-                            callback(false);
-                        }).catch((err) => {
-                            callback(err);
-                        });
-                    }, (err) => {
-                        res.status(200).json(match);
-                    });
-
-                }).catch((err) => {
-                    res.status(500).json({
-                        error: "server_error",
-                        error_description: "Internal server error"
-                    });
-                });
             });
         });
     });

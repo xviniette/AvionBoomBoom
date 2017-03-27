@@ -44,6 +44,11 @@ Vue.component('planes', {
             this.$http.delete(`/v1/teams/${id}/plane/${plane}`).then(() => {
                 this.getUserTeams();
             });
+        },
+        box(){
+            this.$http.get("/v1/box").then(() => {
+                this.getUserPlanes();
+            });
         }
     },
     computed:{

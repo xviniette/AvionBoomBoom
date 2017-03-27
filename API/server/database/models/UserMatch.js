@@ -10,6 +10,9 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: false,
             defaultValue: DataTypes.NOW
         },
+        won:{
+            type: DataTypes.BOOLEAN,
+        }
     },
         {
             paranoid: true

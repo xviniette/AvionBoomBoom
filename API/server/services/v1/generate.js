@@ -28,7 +28,7 @@ module.exports = function (app, router) {
         var planes = [
             {
                 name:"Lapinou",
-                level:5
+                level:5,
             },
             {
                 name:"Cancer",
@@ -55,7 +55,11 @@ module.exports = function (app, router) {
                 level:6
             }
         ];
+
         for(var plane of planes){
+            plane.life = Math.floor(Math.random() * 100);
+            plane.armor = Math.floor(Math.random() * 20);
+            plane.radius = Math.floor(Math.random() * 50 + 5);
             db.Plane.create(plane);
         }
         res.status(200).send();

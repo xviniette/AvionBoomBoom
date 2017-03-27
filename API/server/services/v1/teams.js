@@ -270,7 +270,7 @@ module.exports = function (app, router) {
                 if (levelSum + p.level > config.game.teamlevel) {
                     res.status(400).json({
                         error: "team_level",
-                        error_description: `Team level would be ${levelSum + plane.level} instead of ${config.game.teamlevel} max'`
+                        error_description: `Team level would be ${levelSum + p.level} instead of ${config.game.teamlevel} max'`
                     });
                     return;
                 }

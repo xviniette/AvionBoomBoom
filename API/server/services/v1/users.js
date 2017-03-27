@@ -65,7 +65,7 @@ module.exports = function (app, router) {
             });
         });
     });
-    
+
     router.get("/:id", middlewares.fields(models.user.public), (req, res) => {
         db.User.findOne({
             where: {
@@ -81,72 +81,6 @@ module.exports = function (app, router) {
                 return;
             }
             res.status(200).json(user);
-        }).catch((err) => {
-            res.status(500).json({
-                error: "server_error",
-                error_description: err
-            });
-        });
-    });
-
-    router.get("/:id/matchs", middlewares.all(models.match.public, 0, 25, 100, "user"), (req, res) => {
-        db.User.findOne({
-            where: {
-                id: req.params.id
-            },
-        }).then((user) => {
-            if (user == null) {
-                res.status(404).json({
-                    error: "not_found",
-                    error_description: `User with id '${req.params.id}' doesn't exist`
-                });
-                return;
-            }
-
-            async.parallel({
-                matchs(cb) {
-                    user.getMatches({
-                        where: req.filter,
-                        attributes: req.fields,
-                        offset: req.pagination.offset,
-                        limit: req.pagination.limit,
-                        order: req.sort,
-                        include: [{
-                            model: db.User,
-                            attributes: models.user.public
-                        },
-                        {
-                            model: db.Map,
-                            attributes: ["id", "name", "type", "playable", "difficulty"]
-                        }
-                        ]
-                    }).then((matchs) => {
-                        cb(false, matchs);
-                    }).catch((err) => {
-                        cb(err);
-                    });
-                },
-                count(cb) {
-                    user.getMatches({
-                        where: req.filter
-                    }).then((matchs) => {
-                        cb(false, matchs.length);
-                    }).catch((err) => {
-                        cb(err);
-                    });
-                }
-            }, (err, results) => {
-                if (err) {
-                    res.status(500).json({
-                        error: "server_error",
-                        error_description: "Internal server error"
-                    });
-                    return;
-                }
-                res.set("Content-Range", `${req.pagination.range}|${results.count}`);
-                res.status((results.count == results.matchs.length) ? 200 : 206).json(results.matchs);
-            });
-
         }).catch((err) => {
             res.status(500).json({
                 error: "server_error",
@@ -195,8 +129,8 @@ module.exports = function (app, router) {
 
     router.get("/:id/planes", middlewares.all(models.plane.public, 0, 50, 100, "plane"), (req, res) => {
         db.User.findOne({
-            where:{
-                id:req.params.id
+            where: {
+                id: req.params.id
             }
         }).then((user) => {
             if (user == null) {
@@ -228,5 +162,91 @@ module.exports = function (app, router) {
                 error_description: err
             });
         })
+    });
+
+    router.get("/:id/matchs", middlewares.all(models.match.public, 0, 10, 100, "match"), (req, res) => {
+        db.User.findOne({
+            where: {
+                id: req.params.id
+            },
+        }).then((user) => {
+            if (user == null) {
+                res.status(404).json({
+                    error: "not_found",
+                    error_description: `User with id '${req.params.id}' doesn't exist`
+                });
+                return;
+            }
+
+            async.parallel({
+                matchs(cb) {
+                    user.getMatches({
+                        where: req.filter,
+                        attributes: req.fields,
+                        offset: req.pagination.offset,
+                        limit: req.pagination.limit,
+                        order: req.sort,
+                        include: [{
+                                model: db.User,
+                                attributes: models.user.public,
+                            },
+                            {
+                                model: db.UserPlane,
+                                include: {
+                                    model: db.Plane
+                                }
+                            }
+                        ]
+                    }).then((matchs) => {
+                        matchs = JSON.parse(JSON.stringify(matchs));
+
+                        for (var match of matchs) {
+                            for (var plane of match.userplanes) {
+                                if (!req.auth || req.auth.id != plane.userId) {
+                                    if (match.status == 0) {
+                                        delete plane.planematch.x;
+                                        delete plane.planematch.y;
+                                        delete plane.planematch.direction;
+                                    }
+                                    delete plane.planematch.speed;
+                                    delete plane.planematch.rotation;
+                                }
+                            }
+                        }
+
+                        cb(false, matchs);
+                    }).catch((err) => {
+                        console.log(err);
+                        cb(err);
+                    });
+                },
+                count(cb) {
+                    user.countMatches({
+                        where: req.filter,
+                    }).then((count) => {
+                        cb(false, count);
+                    }).catch((err) => {
+                        cb(err);
+                    });
+                }
+            }, (err, results) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).json({
+                        error: "server_error",
+                        error_description: "Internal server error"
+                    });
+                    return;
+                }
+                res.set("Content-Range", `${req.pagination.range}|${results.count}`);
+                res.status((results.count == results.matchs.length) ? 200 : 206).json(results.matchs);
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.status(500).json({
+                error: "server_error",
+                error_description: err
+            });
+        });
     });
 }

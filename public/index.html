@@ -50,6 +50,7 @@
             <ul>
                 <li v-for="plane in getNotOwnedPlanes">{{plane.name}} ({{plane.level}})</li>
             </ul>
+            <button @click="box">DROP</button>
             <h2>Teams</h2>
             <ul>
                 <li v-for="team in STORE.teams">
@@ -109,6 +110,34 @@
                     <span v-if="from.to">to : {{from.to.username}}</span>
                     <button @click="matchmaking(from.ranked, team, from.from.id)">V</button>
                     <button @click="deleteMatchmaking(from.id)">X</button>
+                </li>
+            </ul>
+
+            <h1>Games</h1>
+            <h2>To Play</h2>
+            <ul>
+                <li v-for="game in gamesToPlay">
+                    <h3>ID : {{game.id}}</h3>
+                    <ul>
+                        <li>Joueurs : <span v-for="user of game.users">{{user.username}} </span></li>
+                        <li>Créé : {{game.createdAt}}</li>
+                        <li>Dernier tour : {{game.createdAt}}</li>
+                        <li v-if="game.ranked">Ranked</li>
+                        <li v-if="!game.ranked">Unranked</li>
+                    </ul>
+                </li>
+            </ul>
+            <h2>Waiting</h2>
+            <ul>
+                <li v-for="game in gamesWaiting">
+                    <h3>ID : {{game.id}}</h3>
+                    <ul>
+                        <li>Joueurs : <span v-for="user of game.users">{{user.username}} </span></li>
+                        <li>Créé : {{game.createdAt}}</li>
+                        <li>Dernier tour : {{game.createdAt}}</li>
+                        <li v-if="game.ranked">Ranked</li>
+                        <li v-if="!game.ranked">Unranked</li>
+                    </ul>
                 </li>
             </ul>
         </div>

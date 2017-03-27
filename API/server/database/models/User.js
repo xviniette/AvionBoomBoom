@@ -34,11 +34,6 @@ module.exports = function (sequelize, DataTypes) {
             defaultValue: 0,
             allowNull: false
         },
-        draw: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-            allowNull: false
-        },
         lastAction: DataTypes.DATE
     },
         {

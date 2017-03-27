@@ -1,6 +1,6 @@
 {
     "user": {
-        "public": ["id", "username", "elo", "win", "lose", "draw", "createdAt", "lastAction", "createdAt", "updatedAt"],
+        "public": ["id", "username", "elo", "win", "lose", "createdAt", "lastAction", "createdAt", "updatedAt"],
         "private": ["golds", "gems", "email"]
     },
     "plane": {
@@ -11,6 +11,6 @@
         "public": ["id", "name", "order", "userId", "createdAt", "updatedAt"]
     },
     "match":{
-        "public": ["id", "ranked", "lastTurn", "width", "height", "turn", "status", "turnTime", "createdAt", "lastAction"]
+        "public": ["id", "ranked", "lastTurn", "width", "height", "turn", "status", "turnTime", "createdAt"]
     }
 }
