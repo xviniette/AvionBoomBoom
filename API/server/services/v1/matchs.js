@@ -17,15 +17,15 @@ module.exports = function (app, router) {
                     limit: req.pagination.limit,
                     order: req.sort,
                     include: [{
-                            model: db.User,
-                            attributes: models.user.public
-                        },
-                        {
-                            model: db.UserPlane,
-                            include: {
-                                model: db.Plane
-                            }
+                        model: db.User,
+                        attributes: models.user.public
+                    },
+                    {
+                        model: db.UserPlane,
+                        include: {
+                            model: db.Plane
                         }
+                    }
                     ]
                 }).then((matchs) => {
                     matchs = JSON.parse(JSON.stringify(matchs));
@@ -78,15 +78,15 @@ module.exports = function (app, router) {
             },
             attributes: req.fields,
             include: [{
-                    model: db.User,
-                    attributes: models.user.public
-                },
-                {
-                    model: db.UserPlane,
-                    include: {
-                        model: db.Plane
-                    }
+                model: db.User,
+                attributes: models.user.public
+            },
+            {
+                model: db.UserPlane,
+                include: {
+                    model: db.Plane
                 }
+            }
             ]
         }).then((match) => {
             if (match == null) {
@@ -120,4 +120,75 @@ module.exports = function (app, router) {
             });
         });
     });
+
+    router.post("/:id/turn", middlewares.isAuth, (req, res) => {
+        db.Match.findOne({
+            where: {
+                id: req.params.id
+            },
+            attributes: req.fields,
+            include: [{
+                model: db.User,
+                attributes: models.user.public
+            },
+            {
+                model: db.UserPlane,
+                include: {
+                    model: db.Plane
+                }
+            }
+            ]
+        }).then((match) => {
+            if (match == null) {
+                res.status(404).json({
+                    error: "not_found",
+                    error_description: `Match with id '${req.params.id}' doesn't exist`
+                });
+                return;
+            }
+
+            match = JSON.parse(JSON.stringify(match));
+
+            if(match.status == 2){
+                res.status(400).json({
+                    error: "match_over",
+                    error_description: "Match is already over"
+                });
+                return;
+            }
+
+            var inGame = false;
+            for(var user of match.users){
+                if(user.id == req.auth.id){
+                    if(user.usermatch.hasPlayed){
+                        res.status(400).json({
+                            error: "already_played",
+                            error_description: "You already played this turn"
+                        });
+                        return;
+                    }
+                    inGame = true;
+                    break;
+                }
+            }
+
+            if(!inGame){
+                res.status(403).json({
+                    error: "player_permission",
+                    error_description: "You can't play in this match"
+                });
+                return;
+            }
+
+            
+
+            res.status(200).json(match);
+        }).catch((err) => {
+            console.log(err);
+            res.status(500).json({
+                error: "server_error",
+                error_description: "Internal server error"
+            });
+        });
+});
 }
