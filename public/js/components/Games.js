@@ -18,7 +18,7 @@ Vue.component('games', {
         },
         getOverGames() {
             this.$http.get(`/v1/users/${this.STORE.me.id}/matchs?status=2`).then((matchs) => {
-                this.$set(this.STORE, "playingGame", matchs.body);
+                this.$set(this.STORE, "overGame", matchs.body);
             });
         },
         getFromMatchmakings() {
@@ -59,6 +59,9 @@ Vue.component('games', {
                 this.getToMatchmakings();
                 this.getPlayingGames();
             });
+        },
+        selectGame(id){
+            this.$set(this.STORE, "gameId", id);
         }
     },
     watch: {

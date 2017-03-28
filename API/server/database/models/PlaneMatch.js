@@ -29,6 +29,9 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.FLOAT,
             allowNull: false,
             defaultValue: 0
+        },
+        historic: {
+            type: DataTypes.TEXT
         }
     });
 

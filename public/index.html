@@ -13,6 +13,7 @@
         <home class="inline" v-if="STORE.me"></home>
         <planes class="inline" v-if="STORE.me"></planes>
         <games class="inline" v-if="STORE.me"></games>
+        <game class="inline" v-if="STORE.me && STORE.gameId" :game-id="STORE.gameId"></game>
     </div>
     <script type="x-template" id="sign">
         <div>
@@ -84,8 +85,7 @@
                     <datalist id="users">
                         <option v-for="autoUser in autocompleteUsers" :value="autoUser.username">
                     </datalist>
-                </span>
-                Team : 
+                </span> Team :
                 <select v-model="team">
                     <option v-for="team in STORE.teams" :value="team.id">{{team.name}}</option>
                 </select>
@@ -117,7 +117,7 @@
             <h2>To Play</h2>
             <ul>
                 <li v-for="game in gamesToPlay">
-                    <h3>ID : {{game.id}}</h3>
+                    <h3><a href="#" @click.prevent="selectGame(game.id)">ID : {{game.id}}</a></h3>
                     <ul>
                         <li>Joueurs : <span v-for="user of game.users">{{user.username}} </span></li>
                         <li>Créé : {{game.createdAt}}</li>
@@ -130,7 +130,7 @@
             <h2>Waiting</h2>
             <ul>
                 <li v-for="game in gamesWaiting">
-                    <h3>ID : {{game.id}}</h3>
+                    <h3><a href="#" @click.prevent="selectGame(game.id)">ID : {{game.id}}</a></h3>
                     <ul>
                         <li>Joueurs : <span v-for="user of game.users">{{user.username}} </span></li>
                         <li>Créé : {{game.createdAt}}</li>
@@ -139,6 +139,14 @@
                         <li v-if="!game.ranked">Unranked</li>
                     </ul>
                 </li>
+            </ul>
+        </div>
+    </script>
+    <script type="x-template" id="game">
+        <div>
+            <h2>Players</h2>
+            <ul v-if="game">
+                <li v-for="user of game.users">{{user.username}} ({{user.elo}})</li>
             </ul>
         </div>
     </script>
@@ -155,6 +163,7 @@
     <script src="./js/components/Sign.js"></script>
     <script src="./js/components/Games.js"></script>
     <script src="./js/components/Planes.js"></script>
+    <script src="./js/components/Game.js"></script>
 </body>
 </body>
 
