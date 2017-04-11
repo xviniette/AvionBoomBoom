@@ -1,5 +1,5 @@
 {
-    "PORT":3001,
+    "PORT":3000,
     "mariadb": {
         "database": "avionboomboom",
         "username": "root",
