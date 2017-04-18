@@ -121,6 +121,10 @@ module.exports = function (app, router) {
         });
     });
 
+    var setTurn = function(match, userId, planes, callback){
+
+    }
+
     router.post("/:id/turn", middlewares.isAuth, (req, res) => {
         db.Match.findOne({
             where: {
@@ -180,9 +184,10 @@ module.exports = function (app, router) {
                 return;
             }
 
+            setTurn(match, req.auth.id, req.body.turn, () => {
+                res.status(200).json(match);
+            });
             
-
-            res.status(200).json(match);
         }).catch((err) => {
             console.log(err);
             res.status(500).json({
@@ -190,5 +195,5 @@ module.exports = function (app, router) {
                 error_description: "Internal server error"
             });
         });
-});
+    });
 }

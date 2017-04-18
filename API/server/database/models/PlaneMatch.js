@@ -20,14 +20,14 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: false,
             defaultValue: 0
         },
-        speed: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
+        targetX:{
+            type: DataTypes.INTEGER,
+            allowNull: true,
             defaultValue: 0
         },
-        rotation: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
+        targetY:{
+            type: DataTypes.INTEGER,
+            allowNull: true,
             defaultValue: 0
         },
         historic: {
